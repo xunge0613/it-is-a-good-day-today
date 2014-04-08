@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>It is a good day today by XX</title>
+	<link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+	<img id="background" src="" alt="上海夜景">
+	<audio id="rain1" controls loop>
+      <source src="audio/rainfade_1.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <audio id="rain2" controls loop>
+      <source src="audio/rainfade_1.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+	<script src="js/rainyday.js"></script>
+	<script>
+			document.addEventListener('DOMContentLoaded', function () {
+			     run();
+                 var rain1 = document.getElementById("rain1").play();
+                 var rain2 = document.getElementById("rain2");
+                 var s = setTimeout("rain2.play();clearTimeout();",6000);
+
+			});
+            function run() {
+                var image = document.getElementById('background');
+                image.onload = function() {
+                    var engine = new RainyDay({
+                        image: this,
+                        gravityAngle: Math.PI / 9
+                    });
+                    engine.trail = engine.TRAIL_SMUDGE;
+                    engine.rain([ 
+                        [1, 0, 100],
+                        [3, 3, 1],
+                        [1, 4, 20]
+                    ],
+                    100);
+                };
+                image.crossOrigin = 'anonymous';
+                image.src = './images/shanghai.jpg';
+            }
+        </script>
+</body>
+</html>

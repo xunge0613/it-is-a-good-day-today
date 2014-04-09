@@ -6,13 +6,13 @@
  */
 
 (function() {
-  var run;
+  var getLocation, getWeatherByCityName, getWeatherByGeoCoords, run;
 
   document.addEventListener('DOMContentLoaded', function() {
     var audioSpan;
     run();
     audioSpan = 7288;
-    return soundManager.setup({
+    soundManager.setup({
       onready: function() {
         var rain1, rain2, t;
         rain1 = soundManager.createSound({
@@ -70,6 +70,7 @@
         return rain2.play();
       }
     });
+    return getLocation();
   });
 
   run = function() {
@@ -86,6 +87,54 @@
     };
     image.crossOrigin = 'anonymous';
     return image.src = './images/shanghai.jpg';
+  };
+
+  getLocation = function() {
+    var error, success;
+    success = function(position) {
+      $("#aside").addClass("show");
+      $("#geo_info").text(position);
+      return getWeatherByGeoCoords([position.coords.latitude, position.coords.longtitude]);
+    };
+    error = function(error) {
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          console.info("PERMISSION_DENIED");
+          break;
+        case error.POSITION_UNAVAILABLE:
+          console.info("POSITION_UNAVAILABLE");
+          break;
+        case error.TIMEOUT:
+          console.info("TIMEOUT");
+          break;
+        case error.UNKNOWN_ERROR:
+          console.info("UNKNOWN_ERROR");
+      }
+      return $.get("http://ipinfo.io", function(response) {
+        var coords;
+        $("#aside").addClass("show");
+        $("#geo_info").text(response.loc);
+        coords = response.loc.split(",");
+        if (response.city !== null) {
+          return getWeatherByCityName(response.city);
+        } else {
+          return getWeatherByGeoCoords(coords[0], coords[1]);
+        }
+      }, "jsonp");
+    };
+    return navigator.geolocation.getCurrentPosition(success, error);
+  };
+
+  getWeatherByCityName = function(cityName) {
+    return $.get("http://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&APPID=cb44c4f3d297066b575ecf0bf5dd0751 ", function(response) {
+      return console.log(response);
+    }, "jsonp");
+  };
+
+  getWeatherByGeoCoords = function(lat, lon) {
+    return $.get("http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&APPID=cb44c4f3d297066b575ecf0bf5dd0751 ", function(response) {
+      return console.log(response);
+    }, "jsonp");
   };
 
 }).call(this);

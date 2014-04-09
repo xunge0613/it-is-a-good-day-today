@@ -6,7 +6,7 @@
  */
 
 (function() {
-  var getLocation, getWeatherByCityName, getWeatherByGeoCoords, run;
+  var getLocation, getWeatherByCityName, getWeatherByGeoCoords, run, updateWeatherInfo;
 
   document.addEventListener('DOMContentLoaded', function() {
     var audioSpan;
@@ -113,11 +113,12 @@
       return $.get("http://ipinfo.io", function(response) {
         var coords;
         $("#aside").addClass("show");
-        $("#geo_info").text(response.loc);
         coords = response.loc.split(",");
         if (response.city !== null) {
+          $("#geo_info").text(response.city);
           return getWeatherByCityName(response.city);
         } else {
+          $("#geo_info").text(response.loc);
           return getWeatherByGeoCoords(coords[0], coords[1]);
         }
       }, "jsonp");
@@ -127,14 +128,29 @@
 
   getWeatherByCityName = function(cityName) {
     return $.get("http://api.openweathermap.org/data/2.5/weather?q=" + cityName + "&APPID=cb44c4f3d297066b575ecf0bf5dd0751 ", function(response) {
-      return console.log(response);
+      return updateWeatherInfo(response);
     }, "jsonp");
   };
 
   getWeatherByGeoCoords = function(lat, lon) {
     return $.get("http://api.openweathermap.org/data/2.5/weather?lat=" + lat + "&lon=" + lon + "&APPID=cb44c4f3d297066b575ecf0bf5dd0751 ", function(response) {
-      return console.log(response);
+      return updateWeatherInfo(response);
     }, "jsonp");
+  };
+
+  updateWeatherInfo = function(weatherInfo) {
+    var weather_icon, weather_main, weather_temp;
+    weather_main = weatherInfo.weather[0].main;
+    weather_icon = weatherInfo.weather[0].icon;
+    weather_temp = weatherInfo.main.temp;
+    $("#weather_icon").attr({
+      "src": "http://openweathermap.org/img/w/" + weather_icon + ".png",
+      "title": weather_main,
+      "alt": weather_main
+    });
+    $("#aside").addClass(weather_main);
+    $("#weather_text").text(weather_main);
+    return $("#weather_temp").text(weather_temp + " °F");
   };
 
 }).call(this);

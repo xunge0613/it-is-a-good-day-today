@@ -16,12 +16,19 @@
       ga('require', 'displayfeatures');
       ga('send', 'pageview');
     </script>
-	<img id="background" src="" alt="上海夜景">	
+	<img id="background" src="" alt="Shanghai Evening">	
     <main>
         <aside id="aside">
             <dl>
-                <dt>您的位置：</dt>
+                <dt>Location：</dt>
                 <dd id="geo_info"></dd>
+                <dt>Weather:</dt>
+                <dd>
+                    <img id="weather_icon" src="" alt="unknown weather" title="unknown weather" />
+                    <span id="weather_text"></span>
+                </dd>
+                <dt>Temperature</dt>
+                <dd id="weather_temp"></dd>
             </dl>
         </aside>
     </main>

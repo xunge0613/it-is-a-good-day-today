@@ -105,12 +105,13 @@ getLocation = ->
         $.get(
             "http://ipinfo.io", 
             (response) ->
-                $("#aside").addClass("show")
-                $("#geo_info").text(response.loc)
+                $("#aside").addClass("show")                
                 coords = response.loc.split(",")               
                 if response.city isnt null
+                    $("#geo_info").text(response.city)
                     getWeatherByCityName(response.city)
                 else
+                    $("#geo_info").text(response.loc)
                     getWeatherByGeoCoords(coords[0],coords[1])
             ,"jsonp"
         );
@@ -123,7 +124,7 @@ getWeatherByCityName = (cityName) ->
     $.get(
         "http://api.openweathermap.org/data/2.5/weather?q="+cityName+"&APPID=cb44c4f3d297066b575ecf0bf5dd0751 ", 
         (response) ->
-            console.log(response)
+            updateWeatherInfo(response)
         ,"jsonp"
     );
 
@@ -131,6 +132,25 @@ getWeatherByGeoCoords = (lat,lon) ->
     $.get(
         "http://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+lon+"&APPID=cb44c4f3d297066b575ecf0bf5dd0751 ", 
         (response) ->
-            console.log(response)
+            updateWeatherInfo(response)
         ,"jsonp"
     );
+
+## update weather info 
+
+updateWeatherInfo = (weatherInfo) -> 
+    weather_main = weatherInfo.weather[0].main
+    weather_icon = weatherInfo.weather[0].icon
+    weather_temp = weatherInfo.main.temp
+
+    # set weather icon 
+    $("#weather_icon").attr({"src": "http://openweathermap.org/img/w/"+weather_icon+".png" , "title":weather_main,"alt":weather_main})
+
+    # change aside background color 
+    $("#aside").addClass(weather_main);
+
+    # render weather text info  
+    $("#weather_text").text(weather_main);
+    $("#weather_temp").text(weather_temp+" °F");
+
+

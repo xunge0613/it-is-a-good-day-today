@@ -1,6 +1,6 @@
-it-is-a-good-today 今天天气不错
+it-is-a-good-day-today 今天天气不错
 ==================
-### Current Version 0.0.4
+### Current Version 0.0.5
 ### Show different UI according to the weather of your city... hopefully... →_→
 
 
@@ -28,6 +28,7 @@ Thanks to :
 
 ### Change Log
 
+#### v 0.0.5 add GA event track for window.onerror
 #### v 0.0.4 add weather info of your city 
 #### v 0.0.3 add H5 geo location , ip->geo recognition as alternative solution
 #### v 0.0.2 add SoundManager , using CoffeeScript 

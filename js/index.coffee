@@ -1,6 +1,6 @@
 ###
     Author: Dalston Xu
-    Updated: 2014年4月9日1:02:49
+    Updated: 2014年4月12日13:07:58
 ###
 
 
@@ -8,68 +8,23 @@
 document.addEventListener(
     'DOMContentLoaded',
     -> 
-        # RainDrop Effect
-        run()         
-
-        # SoundManager
-        audioSpan = 7288
-        soundManager.setup({
-            onready: ->
-                rain1 = soundManager.createSound(
-                    id: 'rain1',
-                    url: 'audio/rainfade_1.mp3'
-                    autoLoad: true,
-                    multiShotEvents: true,
-                    onload: -> 
-                        this.play({position: 0})
-                    onfinish: ->
-                        this.play({position: 0})
-                )
-                rain1.play();
-
-                t = false;
-
-                rain2 = soundManager.createSound(
-                    id: 'rain2',
-                    url: 'audio/rainfade_1.mp3'
-                    autoLoad: true,
-                    multiShotEvents: true,
-                    onload: -> 
-                        this.play({
-                            volume: 0,
-                            position: audioSpan
-                        })
-                    onfinish: ->
-                        this.play({position: 0})
-                    onplay: ->
-                        return false if t
-                        
-                        e = 3* 1e3
-                        n = 0
-                        r = 100
-                        i = setInterval( -> 
-                            rain2.setVolume((1 + n) * (r / 12));
-                            n++;
-                            if n is 12 
-                                clearInterval(i);
-                                t = true                            
-                        , e / 12)
-                )
-                rain2.play()
-        })    
-
-        # Geo location
+        # Geo location and do many stuff 
         getLocation()
 
 );
 
-# rain drop
-run = ->
+# background image - type0 - SunnyDay
+
+bg_img_0 = ->
+    $('#background').attr({"src":"./images/china_0.jpg"})
+
+# background image - type1 - RainyDay
+
+bg_img_1 = ->
     image = document.getElementById('background')
     image.onload = ->
         engine = new RainyDay({
-            image: this,
-            gravityAngle: Math.PI / 9
+            image: this
         });
         engine.trail = engine.TRAIL_SMUDGE
         engine.rain(
@@ -82,6 +37,74 @@ run = ->
         )
     image.crossOrigin = 'anonymous'
     image.src = './images/shanghai.jpg'
+
+# SoundManager
+
+# background music - type 0 - SunnyDay
+
+bg_music_0 = ->
+    soundManager.setup({
+        onready: ->
+            music = soundManager.createSound(
+                id: 'music',
+                url: 'audio/qing_long_guo.mp3',
+                multiShotEvents: true,
+                onload: -> 
+                    this.play({position: 0})
+                onfinish: ->
+                    this.play({position: 0})
+            )
+            music.play()
+    })
+
+# background music - type 1 - RainyDay
+
+bg_music_1 = ->
+    audioSpan = 7288
+    soundManager.setup({
+        onready: ->
+            rain1 = soundManager.createSound(
+                id: 'rain1',
+                url: 'audio/rainfade_1.mp3',
+                autoLoad: true,
+                multiShotEvents: true,
+                onload: -> 
+                    this.play({position: 0})
+                onfinish: ->
+                    this.play({position: 0})
+            )
+            rain1.play();
+
+            t = false;
+
+            rain2 = soundManager.createSound(
+                id: 'rain2',
+                url: 'audio/rainfade_1.mp3',
+                autoLoad: true,
+                multiShotEvents: true,
+                onload: -> 
+                    this.play({
+                        volume: 0,
+                        position: audioSpan
+                    })
+                onfinish: ->
+                    this.play({position: 0})
+                onplay: ->
+                    return false if t
+                    
+                    e = 3* 1e3
+                    n = 0
+                    r = 100
+                    i = setInterval( -> 
+                        rain2.setVolume((1 + n) * (r / 12));
+                        n++;
+                        if n is 12 
+                            clearInterval(i);
+                            t = true                            
+                    , e / 12)
+            )
+            rain2.play()
+    })    
 
 # geo location
 
@@ -141,6 +164,7 @@ getWeatherByGeoCoords = (lat,lon) ->
 updateWeatherInfo = (weatherInfo) -> 
     weather_main = weatherInfo.weather[0].main
     weather_icon = weatherInfo.weather[0].icon
+    weather_id   = weatherInfo.weather[0].id;
     weather_temp = weatherInfo.main.temp
 
     # set weather icon 
@@ -153,4 +177,27 @@ updateWeatherInfo = (weatherInfo) ->
     $("#weather_text").text(weather_main);
     $("#weather_temp").text(weather_temp+" °F");
 
+    # render Background UI
+    renderUI(weather_id)
 
+
+## present diffent UI according to different weather
+
+renderUI = (weatherConditionCode) -> 
+    uiType = utils.condition2ui(weatherConditionCode)
+    switch uiType
+        when 0
+            bg_music_0()
+            bg_img_0()
+        when 1 
+            bg_music_1()
+            bg_img_1()
+
+## Utils - convert condition code to UI type
+
+utils = {}
+
+utils.condition2ui = (weatherConditionCode) ->
+    uiType = switch
+        when weatherConditionCode // 100 is 8 then 0
+        else 1 

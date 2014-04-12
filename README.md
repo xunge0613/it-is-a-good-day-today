@@ -28,6 +28,7 @@ Thanks to :
 
 ### Change Log
 
+#### v 0.0.6 simply show different UI according to the weather, just simply...
 #### v 0.0.5 add GA event track for window.onerror
 #### v 0.0.4 add weather info of your city 
 #### v 0.0.3 add H5 geo location , ip->geo recognition as alternative solution

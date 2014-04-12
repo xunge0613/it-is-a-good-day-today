@@ -2,17 +2,65 @@
 
 /*
     Author: Dalston Xu
-    Updated: 2014年4月9日1:02:49
+    Updated: 2014年4月12日13:07:58
  */
 
 (function() {
-  var getLocation, getWeatherByCityName, getWeatherByGeoCoords, run, updateWeatherInfo;
+  var bg_img_0, bg_img_1, bg_music_0, bg_music_1, getLocation, getWeatherByCityName, getWeatherByGeoCoords, renderUI, updateWeatherInfo, utils;
 
   document.addEventListener('DOMContentLoaded', function() {
+    return getLocation();
+  });
+
+  bg_img_0 = function() {
+    return $('#background').attr({
+      "src": "./images/china_0.jpg"
+    });
+  };
+
+  bg_img_1 = function() {
+    var image;
+    image = document.getElementById('background');
+    image.onload = function() {
+      var engine;
+      engine = new RainyDay({
+        image: this
+      });
+      engine.trail = engine.TRAIL_SMUDGE;
+      return engine.rain([[1, 0, 100], [3, 3, 1], [1, 4, 20]], 100);
+    };
+    image.crossOrigin = 'anonymous';
+    return image.src = './images/shanghai.jpg';
+  };
+
+  bg_music_0 = function() {
+    return soundManager.setup({
+      onready: function() {
+        var music;
+        music = soundManager.createSound({
+          id: 'music',
+          url: 'audio/qing_long_guo.mp3',
+          multiShotEvents: true,
+          onload: function() {
+            return this.play({
+              position: 0
+            });
+          },
+          onfinish: function() {
+            return this.play({
+              position: 0
+            });
+          }
+        });
+        return music.play();
+      }
+    });
+  };
+
+  bg_music_1 = function() {
     var audioSpan;
-    run();
     audioSpan = 7288;
-    soundManager.setup({
+    return soundManager.setup({
       onready: function() {
         var rain1, rain2, t;
         rain1 = soundManager.createSound({
@@ -70,23 +118,6 @@
         return rain2.play();
       }
     });
-    return getLocation();
-  });
-
-  run = function() {
-    var image;
-    image = document.getElementById('background');
-    image.onload = function() {
-      var engine;
-      engine = new RainyDay({
-        image: this,
-        gravityAngle: Math.PI / 9
-      });
-      engine.trail = engine.TRAIL_SMUDGE;
-      return engine.rain([[1, 0, 100], [3, 3, 1], [1, 4, 20]], 100);
-    };
-    image.crossOrigin = 'anonymous';
-    return image.src = './images/shanghai.jpg';
   };
 
   getLocation = function() {
@@ -139,9 +170,10 @@
   };
 
   updateWeatherInfo = function(weatherInfo) {
-    var weather_icon, weather_main, weather_temp;
+    var weather_icon, weather_id, weather_main, weather_temp;
     weather_main = weatherInfo.weather[0].main;
     weather_icon = weatherInfo.weather[0].icon;
+    weather_id = weatherInfo.weather[0].id;
     weather_temp = weatherInfo.main.temp;
     $("#weather_icon").attr({
       "src": "http://openweathermap.org/img/w/" + weather_icon + ".png",
@@ -150,7 +182,35 @@
     });
     $("#aside").addClass(weather_main);
     $("#weather_text").text(weather_main);
-    return $("#weather_temp").text(weather_temp + " °F");
+    $("#weather_temp").text(weather_temp + " °F");
+    return renderUI(weather_id);
+  };
+
+  renderUI = function(weatherConditionCode) {
+    var uiType;
+    uiType = utils.condition2ui(weatherConditionCode);
+    switch (uiType) {
+      case 0:
+        bg_music_0();
+        return bg_img_0();
+      case 1:
+        bg_music_1();
+        return bg_img_1();
+    }
+  };
+
+  utils = {};
+
+  utils.condition2ui = function(weatherConditionCode) {
+    var uiType;
+    return uiType = (function() {
+      switch (false) {
+        case Math.floor(weatherConditionCode / 100) !== 8:
+          return 0;
+        default:
+          return 1;
+      }
+    })();
   };
 
 }).call(this);

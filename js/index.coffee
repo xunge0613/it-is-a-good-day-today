@@ -19,6 +19,10 @@ bg_img_0 = ->
     $('#background').attr({"src":"./images/china_0.jpg"})
 
 # background image - type1 - RainyDay
+### 
+    Rainy Day 
+    http://maroslaw.github.io/rainyday.js/
+###
 
 bg_img_1 = ->
     image = document.getElementById('background')
@@ -57,9 +61,78 @@ bg_music_0 = ->
             music.play()
     })
 
-# background music - type 1 - RainyDay
+### 
+    SoundManager 
+    http://www.schillmania.com/projects/soundmanager2/
+###
 
-bg_music_1 = ->
+### background music - type 1 - RainyDay ###
+
+bg_music_rain = ->
+    # params
+    audio_rain      = 'audio/rainfade_1.mp3'
+    audio_thunder_s = 'audio/thunderfade_1.mp3'
+    audio_thunder_l = 'audio/loudthunderfade_1.mp3'
+    audioSpan       = 7288    # 第二首曲子的播放时间点
+    music_player = ->
+        rain1 = soundManager.createSound({
+            id: 'rain1',
+            url: audio_rain,
+            autoLoad: true,
+            multiShotEvents: true,
+            onload: -> 
+                this.play({position: 0, loops: 3})
+            #onfinish: ->
+            #    this.play({position: 0})
+        })
+        pause = false
+        rain2 = soundManager.createSound({
+            id: 'rain2',
+            url: audio_rain,
+            autoLoad: true,
+            multiShotEvents: true,
+            onload: -> 
+                this.play({
+                    volume: 0,  # 初始音量为0，渐强
+                    position: audioSpan,
+                    loops: 3
+                })
+            #onfinish: ->
+            #    this.play({position: 0})
+            onplay: ->
+                return false if pause                
+                e = 3* 1e3
+                n = 0
+                r = 100
+                i = setInterval( -> 
+                    rain2.setVolume((1 + n) * (r / 12));
+                    n++;
+                    if n is 12 
+                        clearInterval(i);
+                        t = true                            
+                , e / 12)
+        })
+
+    soundManager.setup({
+        url: "lib/soundmanager/swf/soundmanager2_flash9.swf",
+        preferFlash: false,
+        flashVersion: 9,
+        flashLoadTimeout: 1500,
+        noSWFCache: true,
+        debugFlash: false,
+        onready: music_player
+    })
+    soundManager.ontimeout = (e) -> 
+        soundManager.flashLoadTimeout = 0
+        soundManager.onerror = alert()
+        soundManager.reboot() 
+
+### 
+    background music for mobile 
+
+###
+
+bg_music_rain_mobile = ->
     audioSpan = 7288
     soundManager.setup({
         onready: ->
@@ -186,12 +259,20 @@ updateWeatherInfo = (weatherInfo) ->
 renderUI = (weatherConditionCode) -> 
     uiType = utils.condition2ui(weatherConditionCode)
     switch uiType
-        when 0
+        when 0                  #sunny
             bg_music_0()
             bg_img_0()
-        when 1 
-            bg_music_1()
+        when 1                  #rain
             bg_img_1()
+            ### 
+                Detect Whether is a mobile browser, if true , simply play looped music
+                http://detectmobilebrowsers.com/
+            ###
+            if jQuery.browser.mobile is true
+                bg_music_rain_mobile()
+            else
+                bg_music_rain()
+            
 
 ## Utils - convert condition code to UI type
 

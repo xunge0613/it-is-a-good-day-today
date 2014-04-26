@@ -6,7 +6,7 @@
  */
 
 (function() {
-  var bg_img_0, bg_img_1, bg_music_0, bg_music_1, getLocation, getWeatherByCityName, getWeatherByGeoCoords, renderUI, updateWeatherInfo, utils;
+  var bg_img_0, bg_img_1, bg_music_0, bg_music_rain, bg_music_rain_mobile, getLocation, getWeatherByCityName, getWeatherByGeoCoords, renderUI, updateWeatherInfo, utils;
 
   document.addEventListener('DOMContentLoaded', function() {
     return getLocation();
@@ -17,6 +17,12 @@
       "src": "./images/china_0.jpg"
     });
   };
+
+
+  /* 
+      Rainy Day 
+      http://maroslaw.github.io/rainyday.js/
+   */
 
   bg_img_1 = function() {
     var image;
@@ -57,7 +63,90 @@
     });
   };
 
-  bg_music_1 = function() {
+
+  /* 
+      SoundManager 
+      http://www.schillmania.com/projects/soundmanager2/
+   */
+
+
+  /* background music - type 1 - RainyDay */
+
+  bg_music_rain = function() {
+    var audioSpan, audio_rain, audio_thunder_l, audio_thunder_s, music_player;
+    audio_rain = 'audio/rainfade_1.mp3';
+    audio_thunder_s = 'audio/thunderfade_1.mp3';
+    audio_thunder_l = 'audio/loudthunderfade_1.mp3';
+    audioSpan = 7288;
+    music_player = function() {
+      var pause, rain1, rain2;
+      rain1 = soundManager.createSound({
+        id: 'rain1',
+        url: audio_rain,
+        autoLoad: true,
+        multiShotEvents: true,
+        onload: function() {
+          return this.play({
+            position: 0,
+            loops: 3
+          });
+        }
+      });
+      pause = false;
+      return rain2 = soundManager.createSound({
+        id: 'rain2',
+        url: audio_rain,
+        autoLoad: true,
+        multiShotEvents: true,
+        onload: function() {
+          return this.play({
+            volume: 0,
+            position: audioSpan,
+            loops: 3
+          });
+        },
+        onplay: function() {
+          var e, i, n, r;
+          if (pause) {
+            return false;
+          }
+          e = 3 * 1e3;
+          n = 0;
+          r = 100;
+          return i = setInterval(function() {
+            var t;
+            rain2.setVolume((1 + n) * (r / 12));
+            n++;
+            if (n === 12) {
+              clearInterval(i);
+              return t = true;
+            }
+          }, e / 12);
+        }
+      });
+    };
+    soundManager.setup({
+      url: "lib/soundmanager/swf/soundmanager2_flash9.swf",
+      preferFlash: false,
+      flashVersion: 9,
+      flashLoadTimeout: 1500,
+      noSWFCache: true,
+      debugFlash: false,
+      onready: music_player
+    });
+    return soundManager.ontimeout = function(e) {
+      soundManager.flashLoadTimeout = 0;
+      soundManager.onerror = alert();
+      return soundManager.reboot();
+    };
+  };
+
+
+  /* 
+      background music for mobile
+   */
+
+  bg_music_rain_mobile = function() {
     var audioSpan;
     audioSpan = 7288;
     return soundManager.setup({
@@ -194,8 +283,17 @@
         bg_music_0();
         return bg_img_0();
       case 1:
-        bg_music_1();
-        return bg_img_1();
+        bg_img_1();
+
+        /* 
+            Detect Whether is a mobile browser, if true , simply play looped music
+            http://detectmobilebrowsers.com/
+         */
+        if (jQuery.browser.mobile === true) {
+          return bg_music_rain_mobile();
+        } else {
+          return bg_music_rain();
+        }
     }
   };
 
